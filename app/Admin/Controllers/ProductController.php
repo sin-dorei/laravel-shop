@@ -57,6 +57,12 @@ class ProductController extends AdminController
             $form->model()->price = collect($form->input('skus'))->where(Form::REMOVE_FLAG_NAME, 0)->min('price') ?: 0;
         });
 
+        $form->tools(function (Form\Tools $tools) {
+            $tools->disableDelete();
+            $tools->disableView();
+            // $tools->disableList();
+        });
+
         return $form;
     }
 }

@@ -6,6 +6,6 @@ class PageController extends Controller
 {
     public function root()
     {
-        return view('pages.root');
+        return redirect('/products', 301);
     }
 }

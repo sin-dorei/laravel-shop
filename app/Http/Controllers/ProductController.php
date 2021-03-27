@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Product;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        //
+        $products = Product::query()
+            ->where('on_sale', true)
+            ->paginate(16);
+
+        return view('products.index', compact('products'));
     }
 
     /**
