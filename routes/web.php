@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'PageController@root')->name('root');
 Route::get('products', 'ProductController@index')->name('products.index');
+Route::get('products/{product}', 'ProductController@show')->name('products.show');
 
 Auth::routes(['verify' => true]);
 

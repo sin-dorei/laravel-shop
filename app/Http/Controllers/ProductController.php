@@ -63,15 +63,13 @@ class ProductController extends Controller
         //
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Product  $product
-     * @return \Illuminate\Http\Response
-     */
     public function show(Product $product)
     {
-        //
+        if (!$product->on_sale) {
+            throw new \Exception('商品未上架');
+        }
+
+        return view('products.show', compact('product'));
     }
 
     /**
