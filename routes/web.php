@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'PageController@root')->name('root');
 Route::get('products', 'ProductController@index')->name('products.index');
+Route::get('products/{product}', 'ProductController@show')->name('products.show')->where(['product' => '[0-9]+']);
 
 Auth::routes(['verify' => true]);
 
@@ -19,6 +20,6 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('products/{product}/favorite', 'ProductController@favor')->name('products.favor');
     Route::delete('products/{product}/favorite', 'ProductController@disfavor')->name('products.disfavor');
     Route::get('products/favorites', 'ProductController@favorites')->name('products.favorites');
-});
 
-Route::get('products/{product}', 'ProductController@show')->name('products.show');
+    Route::post('cart', 'CartController@add')->name('cart.add');
+});
