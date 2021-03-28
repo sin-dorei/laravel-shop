@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class CartItemSeeder extends Seeder
+class OrderItemSeeder extends Seeder
 {
     /**
      * Run the database seeds.
