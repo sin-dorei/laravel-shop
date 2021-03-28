@@ -4,11 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CartPost;
 use App\Models\CartItem;
+use App\Models\ProductSku;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    public function add(CartPost $request)
+    public function index(Request $request)
+    {
+        $cartItems = $request->user()->cartItems()->with('productSku.product')->get();
+
+        return view('cart.index', ['cartItems' => $cartItems]);
+    }
+
+    public function add(CartPost $request): array
     {
         $user   = $request->user();
         $skuId  = $request->input('sku_id');
@@ -24,6 +32,13 @@ class CartController extends Controller
             $cart->productSku()->associate($skuId);
             $cart->save();
         }
+
+        return [];
+    }
+
+    public function remove(ProductSku $sku, Request $request): array
+    {
+        $request->user()->cartItems()->where('product_sku_id', $sku->id)->delete();
 
         return [];
     }
