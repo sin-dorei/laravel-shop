@@ -2,84 +2,58 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InvalidRequestException;
+use App\Http\Requests\OrderRequest;
 use App\Models\Order;
-use Illuminate\Http\Request;
+use App\Models\ProductSku;
+use App\Models\UserAddress;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function store(OrderRequest $request)
     {
-        //
-    }
+        $user = $request->user();
+        $order = \DB::transaction(function () use ($user, $request) {
+            $address = UserAddress::find($request->input('address_id'));
+            $address->update(['last_used_at' => now()]);
+            $order = new Order([
+                'address' => [
+                    'address' => $address->full_address,
+                    'zipcode' => $address->zipcode,
+                    'contact_name' => $address->contact_name,
+                    'contact_phone' => $address->contact_phone,
+                ],
+                'remark' => $request->input('remark'),
+                'total_amount' => 0,
+            ]);
+            $order->user()->associate($user);
+            $order->save();
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+            $totalAmount = 0;
+            $items = $request->input('items');
+            foreach ($items as $data) {
+                $sku = ProductSku::find($data['sku_id']);
+                $item = $order->items()->make([
+                    'amount' => $data['amount'],
+                    'price' => $sku->price,
+                ]);
+                $item->product()->associate($sku->product_id);
+                $item->productSku()->associate($sku);
+                $item->save();
+                $totalAmount += $sku->price * $data['amount'];
+                if ($sku->decreaseStock($data['amount']) <= 0) {
+                    throw new InvalidRequestException('该商品库存不足');
+                }
+            }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+            $order->update(['total_amount' => $totalAmount]);
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Order $order)
-    {
-        //
-    }
+            $skuIds = collect($items)->pluck('sku_id');
+            $user->cartItems()->whereIn('product_sku_id', $skuIds)->delete();
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Order $order)
-    {
-        //
-    }
+            return $order;
+        });
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Order $order)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Order $order)
-    {
-        //
+        return $order;
     }
 }
