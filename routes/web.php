@@ -17,4 +17,6 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::delete('user_addresses/{user_address}', 'UserAddressController@destroy')->name('user_addresses.destroy');
 
     // Route::resource('products', 'ProductController', ['except' => ['index']]);
+    Route::post('products/{product}/favorite', 'ProductController@favor')->name('products.favor');
+    Route::delete('products/{product}/favorite', 'ProductController@disfavor')->name('products.disfavor');
 });
