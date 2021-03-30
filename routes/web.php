@@ -31,6 +31,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     Route::post('orders/{order}/received', 'OrderController@received')->name('orders.received');
     Route::get('orders/{order}/review', 'OrderController@review')->name('orders.review.show');
     Route::post('orders/{order}/review', 'OrderController@sendReview')->name('orders.review.store');
+    Route::post('orders/{order}/apply_refund', 'OrderController@applyRefund')->name('orders.apply_refund');
 
     Route::get('payment/{order}/alipay', 'PaymentController@payByAlipay')->name('payment.alipay');
     Route::get('payment/alipay/return', 'PaymentController@alipayReturn')->name('payment.alipay.return');
