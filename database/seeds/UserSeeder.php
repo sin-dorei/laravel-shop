@@ -7,7 +7,7 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        factory(User::class)->times(10)->create();
+        factory(User::class)->times(100)->create();
 
         $user = User::query()->first();
         $user->name = 'Chun';
