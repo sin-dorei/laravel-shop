@@ -17,8 +17,9 @@ class OrderSeeder extends Seeder
         // 被购买的商品，用于后面更新商品销量和评分
         $products = collect([]);
         foreach ($orders as $order) {
+            Log::info(3232);
             // 每笔订单随机 1 - 3 个商品
-            $items = factory(OrderItem::class, random_int(1, 3))->create([
+            $items = factory(OrderItem::class)->times(random_int(1, 3))->create([
                 'order_id'    => $order->id,
                 'rating'      => $order->reviewed ? random_int(1, 5) : null,  // 随机评分 1 - 5
                 'review'      => $order->reviewed ? $faker->sentence : null,
