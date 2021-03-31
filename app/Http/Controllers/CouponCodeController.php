@@ -3,83 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\CouponCode;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class CouponCodeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function show($code)
     {
-        //
-    }
+        // 判断优惠券是否存在
+        if (!$record = CouponCode::where('code', $code)->first()) {
+            abort(404);
+        }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+        // 如果优惠券没有启用，则等同于优惠券不存在
+        if (!$record->enabled) {
+            abort(404);
+        }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        if ($record->total - $record->used <= 0) {
+            return response()->json(['msg' => '该优惠券已被兑完'], 403);
+        }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\CouponCode  $couponCode
-     * @return \Illuminate\Http\Response
-     */
-    public function show(CouponCode $couponCode)
-    {
-        //
-    }
+        if ($record->not_before && $record->not_before->gt(Carbon::now())) {
+            return response()->json(['msg' => '该优惠券现在还不能使用'], 403);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\CouponCode  $couponCode
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(CouponCode $couponCode)
-    {
-        //
-    }
+        if ($record->not_after && $record->not_after->lt(Carbon::now())) {
+            return response()->json(['msg' => '该优惠券已过期'], 403);
+        }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\CouponCode  $couponCode
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, CouponCode $couponCode)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\CouponCode  $couponCode
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(CouponCode $couponCode)
-    {
-        //
+        return $record;
     }
 }
